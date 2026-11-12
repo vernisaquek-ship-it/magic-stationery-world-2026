@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>《小时候的幻想时刻》Childhood Fantasy Moments</title>
+<meta name="description" content="如果文具拥有魔法，你最想实现什么愿望？——学生团队制作的 8 集短剧《小时候的幻想时刻》官方网站。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Quicksand:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================
+   《小时候的幻想时刻》 — STYLES
+   目录：1 变量/基础 · 2 加载&欢迎页 · 3 背景 · 4 导航 · 5 HOME
+        6 ABOUT · 7 EPISODES · 8 弹窗播放器 · 9 CHARACTERS
+        10 THE END · 11 自定义鼠标 · 12 其他 · 13 响应式
+   ===================================================== */
+
+/* ---------- 1. 变量 / 基础 ---------- */
+:root{
+  --cream:#fff6d6; --cream2:#ffeeb0;
+  --blue:#a9d9ff; --blue-d:#5fb4f2;
+  --lav:#dccbff;  --lav-d:#9d7be8;
+  --pink:#ffc8dd; --pink-d:#ff8fb8;
+  --yellow:#ffd84d;
+  --ink:#4b3f72;  --ink-soft:#6f6494;
+  --paper:#fffdf5;
+  --player-ratio:9/16;  /* 竖屏比例：改这里即可，例如 9/15 */
+  --player-w:min(400px,calc((100vh - 210px) * 9 / 16));
+  --shadow:0 12px 30px rgba(120,100,180,.20);
+  --font-title:'ZCOOL KuaiLe','Baloo 2','Noto Sans SC',cursive;
+  --font-body:'Quicksand','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-body); color:var(--ink); line-height:1.75;
+  position:relative; min-height:100vh; overflow-x:hidden;
+  background:
+    radial-gradient(circle at 10% 6%, #cfe9ff 0, transparent 38%),
+    radial-gradient(circle at 92% 18%, #e6d8ff 0, transparent 40%),
+    radial-gradient(circle at 18% 68%, #ffd9e8 0, transparent 38%),
+    radial-gradient(circle at 88% 92%, #cfe9ff 0, transparent 40%),
+    var(--cream);
+  background-attachment:fixed;
+}
+/* 方格笔记本纹理 */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.55;
+  background-image:
+    linear-gradient(rgba(143,200,245,.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143,200,245,.28) 1px, transparent 1px);
+  background-size:34px 34px;
+}
+body.locked, body.modal-open{overflow:hidden}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+section{position:relative;z-index:1;scroll-margin-top:72px}
+.container{width:min(1240px,92vw);margin-inline:auto}
+:focus-visible{outline:3px solid var(--pink-d);outline-offset:3px;border-radius:8px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  padding:.85em 1.7em;border-radius:999px;font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(135deg,var(--pink-d),var(--lav-d));color:#fff;
+  box-shadow:0 6px 0 rgba(75,63,114,.25), 0 14px 24px rgba(157,123,232,.35);
+  transition:transform .2s, box-shadow .2s, filter .2s; position:relative;
+}
+.btn:hover{transform:translateY(-3px);filter:brightness(1.06)}
+.btn:active{transform:translateY(3px) scale(.97);box-shadow:0 2px 0 rgba(75,63,114,.25)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 6px 0 rgba(75,63,114,.15),0 14px 24px rgba(120,100,180,.18)}
+
+.panel{
+  background:rgba(255,253,245,.9); border:3px solid #fff; border-radius:28px;
+  box-shadow:var(--shadow); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+.sec-head{text-align:center;margin-bottom:46px}
+.eyebrow{
+  display:inline-block;font-family:var(--font-title);letter-spacing:.2em;font-size:.95rem;
+  color:var(--lav-d);background:rgba(255,255,255,.85);padding:.2em 1em;border-radius:999px;
+  box-shadow:0 4px 12px rgba(157,123,232,.18);
+}
+.sec-head h2{
+  font-family:var(--font-title);font-weight:400;font-size:clamp(2rem,5.5vw,3.4rem);margin-top:.35em;
+  color:var(--ink);text-shadow:3px 3px 0 #fff, 6px 6px 0 rgba(169,217,255,.7);
+}
+.squiggle{
+  width:130px;height:12px;margin:12px auto 0;
+  background:radial-gradient(circle at 10px 6px, transparent 5px, var(--pink-d) 5.5px 7px, transparent 7.5px) 0 0/20px 12px repeat-x;
+  opacity:.8;
+}
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .8s ease, transform .8s cubic-bezier(.2,.9,.3,1.1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- 2. 加载 & 欢迎页 ---------- */
+.loader{
+  position:fixed;inset:0;z-index:10000;display:grid;place-items:center;text-align:center;
+  background:linear-gradient(160deg,#fff6d6,#e6f3ff 55%,#eadcff);transition:opacity .6s, visibility .6s;
+}
+.loader.done{opacity:0;visibility:hidden}
+.loader-pencil{width:84px;margin:0 auto 14px;animation:wobble 1s ease-in-out infinite;transform-origin:50% 90%}
+.loader-pencil svg{width:100%;height:auto;filter:drop-shadow(0 6px 6px rgba(75,63,114,.25))}
+.loader p{font-family:var(--font-title);letter-spacing:.2em;font-size:1.2rem}
+.loader-bar{width:min(240px,60vw);height:12px;border-radius:99px;background:#fff;margin:14px auto 0;overflow:hidden;box-shadow:inset 0 2px 4px rgba(75,63,114,.15)}
+.loader-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--blue-d),var(--lav-d),var(--pink-d));animation:load 1.3s ease-out forwards}
+@keyframes load{to{width:100%}}
+@keyframes wobble{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg) translateY(-8px)}}
+
+.intro{
+  position:fixed;inset:0;z-index:9000;display:grid;place-items:center;overflow:hidden;padding:24px;text-align:center;
+  background:
+    radial-gradient(circle at 20% 15%, #cfe9ff, transparent 45%),
+    radial-gradient(circle at 85% 80%, #ffd0e4, transparent 45%),
+    radial-gradient(circle at 80% 15%, #e3d3ff, transparent 40%),
+    var(--cream);
+}
+.intro::before{content:"";position:absolute;inset:0;opacity:.5;
+  background-image:linear-gradient(rgba(143,200,245,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(143,200,245,.3) 1px,transparent 1px);background-size:34px 34px}
+.intro.gone{display:none}
+.intro-items{position:absolute;inset:0;pointer-events:none}
+.intro-item{
+  position:absolute;width:var(--s);transform:rotate(var(--r));
+  animation:flyIn 1.3s cubic-bezier(.2,1.2,.3,1) var(--d) both, floaty 6s ease-in-out calc(var(--d) + 1.3s) infinite;
+  filter:drop-shadow(0 8px 8px rgba(75,63,114,.18));
+}
+.intro-item svg{width:100%;height:auto;display:block}
+@keyframes flyIn{
+  from{transform:translate(var(--sx),var(--sy)) rotate(calc(var(--r) - 200deg)) scale(.3);opacity:0}
+  to{transform:translate(0,0) rotate(var(--r)) scale(1);opacity:1}
+}
+@keyframes floaty{
+  0%,100%{transform:translateY(0) rotate(var(--r))}
+  50%{transform:translateY(-16px) rotate(calc(var(--r) + 7deg))}
+}
+.intro.leaving .intro-item{
+  animation:none; transition:transform 1s cubic-bezier(.6,0,.9,.4), opacity 1s;
+  transform:translate(var(--dx),var(--dy)) rotate(calc(var(--r) + 260deg)) scale(1.5); opacity:0;
+}
+.intro-flash{
+  position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;opacity:0;pointer-events:none;
+  background:radial-gradient(circle,#fff 0,#fff7c2 40%,rgba(255,216,77,0) 70%);
+}
+.intro.leaving .intro-flash{animation:flash 1.2s ease-in .25s forwards}
+@keyframes flash{0%{opacity:0;transform:scale(1)}30%{opacity:1}100%{opacity:1;transform:scale(70)}}
+.intro.leaving{animation:introOut .55s ease .95s forwards}
+@keyframes introOut{to{opacity:0}}
+
+.intro-content{position:relative;z-index:2;max-width:860px;
+  padding:clamp(24px,5vw,48px) clamp(18px,4vw,44px);border-radius:40px;
+  background:radial-gradient(closest-side,rgba(255,253,245,.94) 70%,rgba(255,253,245,0));
+  transition:transform .9s ease, opacity .8s ease;}
+.intro.leaving .intro-content{transform:scale(1.25);opacity:0}
+.intro-sparkle{font-size:1.6rem;letter-spacing:.6em;color:var(--yellow);text-shadow:0 0 12px rgba(255,216,77,.9);animation:twinkle 2s infinite}
+.main-title{
+  font-family:var(--font-title);font-weight:400;line-height:1.1;margin:.2em 0 .1em;
+  font-size:clamp(2.3rem,8.5vw,5.6rem);
+  background:linear-gradient(100deg,var(--blue-d),var(--lav-d) 50%,var(--pink-d));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 0 #fff) drop-shadow(0 10px 14px rgba(157,123,232,.35));
+}
+.sub-title{font-family:var(--font-title);letter-spacing:.14em;font-size:clamp(1rem,3vw,1.7rem);color:var(--ink-soft)}
+.tagline{margin:22px auto 30px;font-size:clamp(1.05rem,2.6vw,1.45rem);font-weight:700;color:var(--ink)}
+.enter-btn{
+  flex-direction:column;gap:0;padding:1em 2.4em;font-size:1.25rem;line-height:1.3;
+  animation:pulse 2.2s ease-in-out infinite;
+}
+.enter-btn small{font-size:.72rem;letter-spacing:.22em;opacity:.92}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes twinkle{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+
+/* ---------- 3. 文具背景 ---------- */
+.bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-item{
+  position:absolute;width:var(--s);opacity:.78;transform:rotate(var(--r));
+  animation:floaty var(--t) ease-in-out var(--d) infinite;
+  filter:drop-shadow(0 6px 6px rgba(75,63,114,.14));
+}
+.bg-item svg{width:100%;height:auto;display:block}
+.spark{position:absolute;color:var(--c);font-size:var(--s);line-height:1;animation:twinkle var(--t) ease-in-out var(--d) infinite;text-shadow:0 0 8px currentColor}
+
+/* ---------- 4. 导航 ---------- */
+.nav{
+  position:fixed;top:12px;left:0;right:0;z-index:500;display:flex;justify-content:center;padding:0 12px;
+  transform:translateY(-130%);transition:transform .8s cubic-bezier(.2,1.2,.3,1) .3s;
+}
+body.entered .nav{transform:none}
+.nav-bar{
+  width:min(1100px,100%);display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:8px 12px 8px 22px;border-radius:999px;position:relative;
+  background:rgba(255,253,245,.88);border:3px solid #fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 26px rgba(120,100,180,.22);
+}
+.brand{font-family:var(--font-title);font-size:1.25rem;display:flex;align-items:center;gap:.4em;white-space:nowrap}
+.brand-star{color:var(--yellow);text-shadow:0 0 8px rgba(255,216,77,.9);animation:twinkle 2.4s infinite}
+.nav-links{display:flex;gap:4px}
+.nav-links a{
+  padding:.5em 1.1em;border-radius:999px;font-weight:700;font-size:.9rem;letter-spacing:.1em;transition:background .25s,color .25s,transform .2s;
+}
+.nav-links a:hover{background:var(--blue);transform:translateY(-2px)}
+.nav-links a.active{background:linear-gradient(135deg,var(--pink-d),var(--lav-d));color:#fff;box-shadow:0 4px 10px rgba(157,123,232,.4)}
+.burger{display:none;width:44px;height:44px;border-radius:50%;background:var(--lav);position:relative}
+.burger span{position:absolute;left:12px;right:12px;height:3px;border-radius:3px;background:var(--ink);transition:.3s}
+.burger span:nth-child(1){top:14px}.burger span:nth-child(2){top:21px}.burger span:nth-child(3){top:28px}
+.nav.open .burger span:nth-child(1){top:21px;transform:rotate(45deg)}
+.nav.open .burger span:nth-child(2){opacity:0}
+.nav.open .burger span:nth-child(3){top:21px;transform:rotate(-45deg)}
+
+/* ---------- 5. HOME ---------- */
+#main{opacity:0;transition:opacity 1s ease .2s}
+body.entered #main{opacity:1}
+.hero{min-height:100vh;display:grid;place-items:center;text-align:center;padding:120px 0 80px}
+.hero-inner{position:relative;max-width:900px;margin:0 auto;padding:clamp(24px,5vw,50px) 20px;border-radius:50px;
+  background:radial-gradient(closest-side,rgba(255,253,245,.92) 65%,rgba(255,253,245,0))}
+.hero-pop{opacity:0}
+body.entered .hero-pop{animation:popIn .9s cubic-bezier(.2,1.3,.3,1) both;animation-delay:calc(var(--i,0) * .15s + .6s)}
+@keyframes popIn{from{opacity:0;transform:translateY(40px) scale(.9)}to{opacity:1;transform:none}}
+.hero .eyebrow{font-size:.85rem}
+.hero .tagline{max-width:640px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.hero-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:38px}
+.hero-stats div{background:#fff;border-radius:20px;padding:.6em 1.4em;box-shadow:0 6px 16px rgba(120,100,180,.15);font-weight:700}
+.hero-stats b{font-family:var(--font-title);font-weight:400;font-size:1.7rem;color:var(--lav-d);margin-right:.2em}
+.hero-float{position:absolute;width:var(--s);animation:floaty 5s ease-in-out var(--d) infinite;transform:rotate(var(--r));filter:drop-shadow(0 8px 8px rgba(75,63,114,.2))}
+.hero-float svg{width:100%;height:auto}
+.scroll-hint{margin-top:40px;font-size:.8rem;letter-spacing:.3em;color:var(--ink-soft);animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(8px)}}
+
+/* ---------- 6. ABOUT ---------- */
+#about{padding:90px 0}
+.about-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:30px;align-items:start}
+.paper{
+  position:relative;padding:34px 34px 34px 74px;border-radius:24px;border:3px solid #fff;box-shadow:var(--shadow);
+  background:var(--paper) repeating-linear-gradient(transparent 0 35px, rgba(143,200,245,.5) 35px 36px);
+  line-height:36px;font-size:1.08rem;
+}
+.paper::before{content:"";position:absolute;left:52px;top:0;bottom:0;width:2px;background:rgba(255,143,184,.6)}
+.paper::after{content:"";position:absolute;left:14px;top:30px;bottom:30px;width:20px;
+  background:radial-gradient(circle,#e9defd 7px,#b9a6f0 8px 9px,transparent 10px) 0 0/20px 56px repeat-y}
+.paper p{margin-bottom:36px}
+.paper p:last-child{margin-bottom:0}
+.paper .poem{font-family:var(--font-title);font-size:1.25rem;color:var(--lav-d)}
+.paper .poem span{display:block}
+.paper strong{background:linear-gradient(transparent 55%,rgba(255,216,77,.7) 55%)}
+.tool-trio{display:grid;gap:18px}
+.tool-card{display:flex;align-items:center;gap:18px;padding:18px 22px;transition:transform .3s}
+.tool-card:hover{transform:translateX(8px) rotate(-1deg)}
+.tool-card svg{width:72px;height:72px;flex:none;filter:drop-shadow(0 4px 4px rgba(75,63,114,.2))}
+.tool-card h4{font-family:var(--font-title);font-weight:400;font-size:1.3rem}
+.tool-card p{font-size:.95rem;color:var(--ink-soft);line-height:1.5}
+.msg-title{text-align:center;font-family:var(--font-title);font-weight:400;font-size:1.6rem;margin:60px 0 22px}
+.msg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.msg-card{padding:26px 22px 22px;position:relative;transition:transform .3s}
+.msg-card:hover{transform:translateY(-8px) rotate(1deg)}
+.msg-card .num{
+  position:absolute;top:-18px;left:18px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--font-title);font-size:1.3rem;color:#fff;background:linear-gradient(135deg,var(--pink-d),var(--lav-d));box-shadow:0 4px 10px rgba(157,123,232,.4)
+}
+.msg-card:nth-child(2) .num{background:linear-gradient(135deg,var(--blue-d),var(--lav-d))}
+.msg-card:nth-child(3) .num{background:linear-gradient(135deg,var(--yellow),var(--pink-d))}
+.msg-card:nth-child(4) .num{background:linear-gradient(135deg,#7fd9b3,var(--blue-d))}
+.msg-card p{font-weight:600;margin-top:.6em}
+
+/* ---------- 7. EPISODES ---------- */
+#episodes{padding:90px 0}
+.stage-banner{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.stage{
+  display:flex;align-items:center;gap:14px;padding:14px 18px;text-align:left;border-radius:22px;background:rgba(255,255,255,.82);
+  border:3px solid transparent;box-shadow:0 8px 20px rgba(120,100,180,.14);transition:transform .25s, border-color .25s, background .25s;
+}
+.stage:hover{transform:translateY(-4px)}
+.stage.active{border-color:var(--pink-d);background:#fff;box-shadow:0 10px 26px rgba(255,143,184,.35)}
+.stage svg{width:54px;height:54px;flex:none}
+.stage b{display:block;font-family:var(--font-title);font-weight:400;font-size:1.1rem;line-height:1.3}
+.stage span{font-size:.82rem;color:var(--ink-soft);line-height:1.3;display:block}
+.ep-hint{text-align:center;font-weight:700;color:var(--ink-soft);margin-bottom:18px;font-size:.95rem}
+.ep-tabs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:34px}
+.ep-tab{
+  padding:.55em 1.15em;border-radius:999px;font-weight:700;letter-spacing:.06em;background:#fff;
+  box-shadow:0 4px 0 rgba(75,63,114,.15);transition:transform .2s, background .25s, color .25s;
+}
+.ep-tab:hover{transform:translateY(-3px)}
+.ep-tab:active{transform:translateY(2px) scale(.96)}
+.ep-tab.active{color:#fff;background:linear-gradient(135deg,var(--pink-d),var(--lav-d));box-shadow:0 4px 0 rgba(75,63,114,.25)}
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:30px 24px}
+.ep-card{
+  --c1:#ffe38a;--c2:#ffb8d4;
+  position:relative;background:var(--paper);border:3px solid #fff;border-radius:24px;padding-top:20px;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .3s, box-shadow .3s;
+}
+.ep-card[data-tool="eraser"]{--c1:#ffc1da;--c2:#d7c6ff}
+.ep-card[data-tool="ruler"]{--c1:#a9d9ff;--c2:#c8f0e0}
+.ep-card::before{ /* 笔记本螺旋 */
+  content:"";position:absolute;top:0;left:0;right:0;height:22px;border-radius:22px 22px 0 0;
+  background:radial-gradient(circle at 12px 11px,#fff 5px,#b9a6f0 5.5px 7.5px,transparent 8px) 0 0/24px 22px repeat-x;
+}
+.ep-card:hover{transform:translateY(-8px) rotate(-.6deg)}
+.ep-card.active{box-shadow:0 0 0 5px var(--pink-d), 0 18px 34px rgba(255,143,184,.35)}
+.ep-cover{
+  position:relative;display:block;width:calc(100% - 28px);margin:6px 14px 0;aspect-ratio:16/9;border-radius:16px;overflow:hidden;
+  background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:inset 0 0 0 3px rgba(255,255,255,.8);
+}
+.ep-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ep-cover .film{position:absolute;top:0;bottom:0;width:14px;background:repeating-linear-gradient(rgba(75,63,114,.55) 0 8px, transparent 8px 16px);opacity:.5;z-index:1}
+.ep-cover .film.l{left:0}.ep-cover .film.r{right:0}
+.ep-bignum{position:absolute;left:24px;top:6px;font-family:var(--font-title);font-size:4.2rem;line-height:1;color:rgba(255,255,255,.9);text-shadow:3px 3px 0 rgba(75,63,114,.25);z-index:1}
+.ep-toolicon{position:absolute;right:22px;bottom:8px;width:54px;z-index:1;transform:rotate(8deg);filter:drop-shadow(0 4px 4px rgba(75,63,114,.3))}
+.ep-toolicon svg{width:100%;height:auto}
+.play-disc{
+  position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;z-index:2;display:grid;place-items:center;
+  background:rgba(255,255,255,.95);box-shadow:0 8px 20px rgba(75,63,114,.35);transition:transform .25s;
+}
+.play-disc svg{width:26px;height:26px;margin-left:4px}
+.ep-cover:hover .play-disc{transform:scale(1.18)}
+.ep-cover::after{content:"";position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid #fff;animation:ring 2s ease-out infinite;z-index:1}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(2);opacity:0}}
+.ep-body{padding:16px 20px 22px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ep-badge{align-self:flex-start;font-weight:700;font-size:.76rem;letter-spacing:.18em;padding:.15em .8em;border-radius:999px;color:#fff;background:linear-gradient(135deg,var(--blue-d),var(--lav-d))}
+.ep-card[data-tool="eraser"] .ep-badge{background:linear-gradient(135deg,var(--pink-d),var(--lav-d))}
+.ep-card[data-tool="ruler"] .ep-badge{background:linear-gradient(135deg,#7fd9b3,var(--blue-d))}
+.ep-body h3{font-family:var(--font-title);font-weight:400;font-size:1.45rem;line-height:1.25}
+.ep-en{font-size:.82rem;color:var(--ink-soft);letter-spacing:.06em;margin-top:-4px}
+.ep-loc{font-size:.82rem;font-weight:700;color:var(--lav-d)}
+.ep-desc{font-size:.95rem;line-height:1.6;flex:1}
+.ep-play{margin-top:8px;align-self:stretch;padding:.7em 1em}
+
+/* ---------- 8. 弹窗播放器 ---------- */
+.modal{position:fixed;inset:0;z-index:800;display:none;overflow-y:auto;padding:min(4vw,32px) min(3vw,20px)}
+.modal.open{display:flex;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0}}
+.modal-backdrop{position:fixed;inset:0;background:rgba(36,24,76,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.modal-card{
+  position:relative;width:min(900px,100%);margin:auto;background:var(--paper);border-radius:28px;border:4px solid #fff;
+  padding:34px clamp(16px,3vw,32px) 24px;box-shadow:0 30px 70px rgba(0,0,0,.45);animation:cardIn .5s cubic-bezier(.2,1.3,.3,1);
+}
+@keyframes cardIn{from{transform:translateY(50px) scale(.92);opacity:0}}
+.modal-card::before{content:"";position:absolute;top:0;left:0;right:0;height:26px;border-radius:24px 24px 0 0;
+  background:radial-gradient(circle at 14px 13px,#fff 6px,#b9a6f0 6.5px 8.5px,transparent 9px) 0 0/28px 26px repeat-x}
+.modal-close{
+  position:absolute;top:-14px;right:-6px;width:48px;height:48px;border-radius:50%;font-size:1.3rem;font-weight:700;color:#fff;z-index:3;
+  background:linear-gradient(135deg,var(--pink-d),var(--lav-d));box-shadow:0 6px 14px rgba(0,0,0,.3);transition:transform .25s;
+}
+.modal-close:hover{transform:rotate(90deg) scale(1.1)}
+.modal-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:14px}
+.modal-head .ep-badge{align-self:center}
+.modal-head h3{font-family:var(--font-title);font-weight:400;font-size:clamp(1.5rem,4vw,2.2rem)}
+.modal-head p{font-size:.9rem;color:var(--ink-soft);letter-spacing:.06em}
+.player-wrap{position:relative;width:100%;aspect-ratio:var(--player-ratio);border-radius:18px;overflow:hidden;background:#1d1635;border:4px solid #fff;box-shadow:0 12px 30px rgba(75,63,114,.35)}
+.player-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.player-empty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;padding:20px;color:#fff;
+  background:radial-gradient(circle at 30% 20%,#7a63c8,transparent 60%),radial-gradient(circle at 80% 90%,#d870a8,transparent 55%),#2a2152}
+.player-empty .pe-icon{width:70px;animation:wobble 2s ease-in-out infinite}
+.player-empty .pe-icon svg{width:100%;height:auto}
+.player-empty strong{font-family:var(--font-title);font-weight:400;font-size:1.6rem}
+.player-empty p{font-size:.85rem;opacity:.85;max-width:420px}
+.player-empty code{background:rgba(255,255,255,.18);padding:.1em .5em;border-radius:6px}
+.modal-info{margin-top:18px;display:grid;gap:8px}
+.modal-info .loc{font-weight:700;color:var(--lav-d)}
+.modal-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;flex-wrap:wrap}
+.modal-nav .btn{padding:.6em 1.3em;font-size:.95rem}
+.modal-nav .btn[disabled]{opacity:.4;pointer-events:none}
+.modal-tool{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem;color:var(--ink-soft)}
+.modal-tool svg{width:36px;height:36px}
+
+.modal-layout{display:grid;grid-template-columns:var(--player-w) minmax(0,1fr);gap:26px;align-items:start;justify-content:center}
+.modal-side{display:flex;flex-direction:column;gap:6px;min-width:0}
+.modal-side .modal-info{margin-top:0}
+.file-note{margin-top:14px;padding:10px 14px;border-radius:14px;background:#fff3c4;font-size:.82rem;line-height:1.6}
+@media (max-width:760px){
+  .modal-layout{grid-template-columns:1fr;justify-items:center}
+  .player-wrap{width:min(100%,calc((100vh - 280px) * 9 / 16));min-width:220px}
+  .modal-side{width:100%}
+}
+
+/* ---------- 9. CHARACTERS ---------- */
+#characters{padding:90px 0}
+.char-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:34px 26px}
+.char-card{padding:20px 20px 24px;text-align:center;position:relative;transition:transform .35s}
+.char-card:nth-child(odd){transform:rotate(-1.2deg)}
+.char-card:nth-child(even){transform:rotate(1.2deg)}
+.char-card:hover{transform:translateY(-10px) rotate(0)}
+.photo-slot{
+  position:relative;aspect-ratio:4/5;border-radius:16px;overflow:hidden;border:4px solid #fff;box-shadow:0 8px 20px rgba(75,63,114,.18);margin:6px 0 16px;
+  background:linear-gradient(160deg,var(--pb1,#cfe9ff),var(--pb2,#e6d8ff));
+}
+.photo-slot::before{content:"";position:absolute;top:-4px;left:50%;width:84px;height:26px;margin-left:-42px;background:rgba(255,216,77,.75);transform:rotate(-3deg);z-index:2;border-radius:3px}
+.photo-slot img,.photo-slot svg{width:100%;height:100%;object-fit:cover}
+.photo-hint{position:absolute;left:0;right:0;bottom:8px;font-size:.7rem;font-weight:700;letter-spacing:.2em;color:rgba(75,63,114,.55)}
+.char-card h3{font-family:var(--font-title);font-weight:400;font-size:1.8rem;line-height:1.2}
+.char-en{font-size:.82rem;letter-spacing:.14em;color:var(--ink-soft)}
+.role{display:inline-block;margin:8px 0;padding:.1em .9em;border-radius:999px;font-weight:700;font-size:.82rem;color:#fff;background:linear-gradient(135deg,var(--pink-d),var(--lav-d))}
+.char-card p{font-size:.95rem;line-height:1.6;text-align:left}
+
+/* ---------- 10. THE END ---------- */
+#end{
+  padding:140px 0 110px;text-align:center;color:#fff;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,246,214,0) 0,#b99be6 12%,#6d56b8 45%,#3a2c78 100%);
+}
+.end-rays{position:absolute;left:50%;top:42%;width:1400px;height:1400px;margin:-700px 0 0 -700px;opacity:.28;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.9) 0 6deg,transparent 6deg 24deg);
+  -webkit-mask-image:radial-gradient(circle,#000 0,transparent 62%);mask-image:radial-gradient(circle,#000 0,transparent 62%);animation:spin 80s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.end-stars,.end-fall{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.end-stars .spark{color:#fff7c2}
+.fall-item{position:absolute;top:-120px;width:var(--s);opacity:.85;animation:fall var(--t) linear var(--d) infinite;animation-play-state:paused;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+.fall-item svg{width:100%;height:auto}
+#end.visible .fall-item{animation-play-state:running}
+@keyframes fall{from{transform:translateY(-10vh) rotate(0)}to{transform:translateY(130vh) rotate(var(--rot))}}
+.end-inner{position:relative;z-index:2}
+.the-end{
+  font-family:var(--font-title);font-weight:400;line-height:1;font-size:clamp(4rem,17vw,11rem);letter-spacing:.06em;
+  background:linear-gradient(100deg,#fff7c2,#ffc8dd,#a9d9ff,#fff7c2);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shimmer 6s linear infinite;filter:drop-shadow(0 0 22px rgba(255,255,255,.55)) drop-shadow(0 8px 0 rgba(58,44,120,.45));
+}
+@keyframes shimmer{to{background-position:300% 0}}
+.end-title{font-family:var(--font-title);font-size:clamp(1.5rem,5vw,2.8rem);margin-top:10px;text-shadow:0 0 14px rgba(255,255,255,.6)}
+.end-quote{
+  max-width:720px;margin:36px auto;padding:30px clamp(18px,4vw,40px);border-radius:28px;font-size:clamp(1.05rem,2.5vw,1.3rem);line-height:2;font-weight:600;
+  background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 0 40px rgba(255,255,255,.18) inset;
+}
+.end-quote p+p{margin-top:.8em}
+.thanks{font-family:var(--font-title);font-size:clamp(1.6rem,5.5vw,3rem);margin:30px 0 8px;letter-spacing:.04em;text-shadow:0 0 14px rgba(255,255,255,.7)}
+.thanks span{display:inline-block;animation:letter 2.2s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes letter{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px);color:#fff7c2}}
+.end-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:30px}
+.end-foot{margin-top:60px;font-size:.82rem;letter-spacing:.14em;opacity:.8}
+
+/* ---------- 11. 自定义鼠标 ---------- */
+.cursor{position:fixed;left:0;top:0;z-index:99999;pointer-events:none;opacity:0;will-change:transform;display:none}
+html.cc .cursor{display:block}
+html.cc .cursor.on:not(.out):not(.hidden){opacity:1}
+.cursor-inner{
+  position:absolute;left:calc(var(--hx,0px) * -1);top:calc(var(--hy,0px) * -1);width:48px;height:48px;
+  transform-origin:var(--hx,0) var(--hy,0);transition:transform .12s ease-out;filter:drop-shadow(0 3px 3px rgba(75,63,114,.35));
+}
+.cursor-inner svg{width:48px;height:48px;display:block}
+.cursor.press .cursor-inner{transform:scale(.82) rotate(-9deg)}
+.cursor.swap .cursor-inner{animation:cursorSwap .55s cubic-bezier(.2,1.4,.3,1)}
+@keyframes cursorSwap{0%{transform:scale(.2) rotate(-120deg);opacity:0}60%{transform:scale(1.35) rotate(12deg);opacity:1}100%{transform:none}}
+html.cc, html.cc *{cursor:none !important}
+html.cc .player-wrap, html.cc .player-wrap *{cursor:auto !important}   /* 影片区域恢复系统鼠标，保证播放器可正常操作 */
+.trail,.burst{position:fixed;pointer-events:none;z-index:99998;line-height:1;transform:translate(-50%,-50%)}
+.trail{animation:trail .8s ease-out forwards}
+@keyframes trail{from{opacity:.95;transform:translate(-50%,-50%) scale(1)}to{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + 22px)) scale(.3) rotate(120deg)}}
+.burst{animation:burst .75s ease-out forwards}
+@keyframes burst{from{opacity:1;transform:translate(-50%,-50%) scale(.4)}to{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.15) rotate(200deg)}}
+
+/* ---------- 12. 其他：提示、返回顶部 ---------- */
+.toast{
+  position:fixed;left:50%;bottom:28px;z-index:9500;transform:translate(-50%,30px);opacity:0;pointer-events:none;
+  padding:.7em 1.4em;border-radius:999px;font-weight:700;color:#fff;background:rgba(75,63,114,.92);box-shadow:0 10px 24px rgba(0,0,0,.3);
+  transition:.4s cubic-bezier(.2,1.3,.3,1);max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.to-top{
+  position:fixed;right:20px;bottom:20px;z-index:600;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--pink-d),var(--lav-d));box-shadow:0 8px 20px rgba(157,123,232,.5);
+  opacity:0;transform:translateY(30px) scale(.6);pointer-events:none;transition:.35s cubic-bezier(.2,1.3,.3,1);
+}
+.to-top.show{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{transform:translateY(-5px) scale(1.08)}
+.to-top svg{width:30px;height:30px}
+noscript{position:fixed;z-index:20000;inset:auto 0 0 0;background:#ff8fb8;color:#fff;text-align:center;padding:10px}
+
+/* 影片播放时暂停背景动画，避免干扰 */
+html.video-open .bg-item, html.video-open .spark, html.video-open .fall-item, html.video-open .hero-float, html.video-open .end-rays{animation-play-state:paused !important}
+
+/* ---------- 13. 响应式 ---------- */
+@media (max-width:900px){
+  .about-grid{grid-template-columns:1fr}
+  .stage-banner{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .burger{display:block}
+  .nav-links{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;flex-direction:column;padding:12px;border-radius:26px;
+    background:rgba(255,253,245,.97);border:3px solid #fff;box-shadow:0 14px 30px rgba(120,100,180,.25);
+    opacity:0;visibility:hidden;transform:translateY(-10px);transition:.3s;
+  }
+  .nav.open .nav-links{opacity:1;visibility:visible;transform:none}
+  .nav-links a{text-align:center;padding:.8em}
+  .hero-float{display:none}
+}
+@media (max-width:560px){
+  .paper{padding:26px 18px 26px 54px;font-size:1rem}
+  .paper::before{left:38px}.paper::after{left:8px}
+  .modal-close{top:-10px;right:-2px;width:42px;height:42px}
+  .ep-bignum{font-size:3.4rem}
+  .to-top{width:48px;height:48px;right:14px;bottom:14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+
+<body class="locked">
+<noscript>请开启 JavaScript 以进入魔法世界 ✦ Please enable JavaScript.</noscript>
+
+<!-- 加载动画 -->
+<div id="loader" class="loader" aria-label="加载中">
+  <div>
+    <div class="loader-pencil" id="loaderPencil"></div>
+    <p>LOADING MAGIC…</p>
+    <div class="loader-bar"><i></i></div>
+  </div>
+</div>
+
+<!-- 欢迎画面 -->
+<div id="intro" class="intro" role="region" aria-label="欢迎">
+  <div class="intro-items" id="introItems"></div>
+  <div class="intro-flash"></div>
+  <div class="intro-content">
+    <div class="intro-sparkle">✦ ✧ ✦</div>
+    <h1 class="main-title">《小时候的幻想时刻》</h1>
+    <p class="sub-title">Childhood Fantasy Moments</p>
+    <p class="tagline">「如果文具拥有魔法，你最想实现什么愿望？」</p>
+    <button class="btn enter-btn" id="enterBtn" type="button">
+      <span>进入魔法世界</span><small>ENTER THE MAGIC WORLD</small>
+    </button>
+  </div>
+</div>
+
+<!-- 自定义鼠标 / 提示 -->
+<div id="cursor" class="cursor" aria-hidden="true"><div class="cursor-inner"></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- 文具背景（由 JS 生成） -->
+<div id="bg" class="bg" aria-hidden="true"></div>
+
+<!-- 导航栏 -->
+<header id="nav" class="nav">
+  <div class="nav-bar">
+    <a class="brand" href="#home"><span class="brand-star">✦</span><span>幻想时刻</span></a>
+    <button class="burger" id="burger" type="button" aria-label="打开菜单" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="nav-links" id="navLinks" aria-label="主导航">
+      <a href="#home" data-sec="home">HOME</a>
+      <a href="#about" data-sec="about">ABOUT</a>
+      <a href="#episodes" data-sec="episodes">EPISODES</a>
+      <a href="#characters" data-sec="characters">CHARACTERS</a>
+      <a href="#end" data-sec="end">THE END</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HOME -->
+  <section id="home" class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div id="heroFloats"></div>
+        <span class="eyebrow hero-pop" style="--i:0">A STUDENT SHORT-FILM SERIES · 8 EPISODES</span>
+        <h2 class="main-title hero-pop" style="--i:1;margin-top:.3em">《小时候的幻想时刻》</h2>
+        <p class="sub-title hero-pop" style="--i:2">Childhood Fantasy Moments</p>
+        <p class="tagline hero-pop" style="--i:3">「如果文具拥有魔法，你最想实现什么愿望？」</p>
+        <div class="hero-actions hero-pop" style="--i:4">
+          <a class="btn" href="#episodes">▶ 开始观看 WATCH NOW</a>
+          <a class="btn ghost" href="#about">了解故事 OUR STORY</a>
+        </div>
+        <div class="hero-stats hero-pop" style="--i:5">
+          <div><b>8</b>集短剧</div><div><b>3</b>件魔法文具</div><div><b>1</b>段友情故事</div>
+        </div>
+        <p class="scroll-hint hero-pop" style="--i:6">SCROLL ↓</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="container">
+      <div class="sec-head reveal">
+        <span class="eyebrow">OUR STORY</span>
+        <h2>我们的故事</h2>
+        <div class="squiggle"></div>
+      </div>
+      <div class="about-grid">
+        <div class="paper reveal">
+          <p>小时候，我们总是喜欢把身边的文具变成自己想象中的<strong>魔法道具</strong>。</p>
+          <p class="poem"><span>一支笔，可以实现愿望；</span><span>一块橡皮擦，可以擦掉不开心的事情；</span><span>一把尺，也许拥有我们意想不到的力量。</span></p>
+          <p>故事围绕<strong>小蓝、小紫</strong>和神奇文具展开。原本只是一个充满童趣的幻想，却因为嫉妒、比较和贪念，让魔法逐渐变成了一场意想不到的冒险。</p>
+        </div>
+        <div class="tool-trio reveal" id="toolTrio"></div>
+      </div>
+
+      <h3 class="msg-title reveal">通过这个故事，我们希望表达</h3>
+      <div class="msg-grid">
+        <div class="panel msg-card reveal"><span class="num">1</span><p>不要因为羡慕别人，就否定自己的价值。</p></div>
+        <div class="panel msg-card reveal"><span class="num">2</span><p>犯错并不可怕，重要的是愿意承认和改正。</p></div>
+        <div class="panel msg-card reveal"><span class="num">3</span><p>真正的快乐不是拥有别人的东西，而是珍惜自己拥有的东西。</p></div>
+        <div class="panel msg-card reveal"><span class="num">4</span><p>友情需要理解、包容和信任。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EPISODES -->
+  <section id="episodes">
+    <div class="container">
+      <div class="sec-head reveal">
+        <span class="eyebrow">EPISODES</span>
+        <h2>魔法剧集</h2>
+        <div class="squiggle"></div>
+      </div>
+      <div class="stage-banner reveal" id="stageBanner"></div>
+      <p class="ep-hint reveal">点选集数，鼠标会变成对应阶段的魔法文具 ✦ 点击 PLAY 开始观看</p>
+      <div class="ep-tabs reveal" id="epTabs"></div>
+      <div class="ep-grid" id="epGrid"></div>
+    </div>
+  </section>
+
+  <!-- CHARACTERS -->
+  <section id="characters">
+    <div class="container">
+      <div class="sec-head reveal">
+        <span class="eyebrow">CHARACTERS</span>
+        <h2>角色介绍</h2>
+        <div class="squiggle"></div>
+      </div>
+      <div class="char-grid" id="charGrid"></div>
+    </div>
+  </section>
+
+  <!-- THE END -->
+  <section id="end">
+    <div class="end-rays"></div>
+    <div class="end-stars" id="endStars"></div>
+    <div class="end-fall" id="endFall"></div>
+    <div class="container end-inner">
+      <h2 class="the-end reveal">THE END</h2>
+      <p class="end-title reveal">《小时候的幻想时刻》</p>
+      <div class="end-quote reveal">
+        <p>「小时候，我们总希望拥有神奇的魔法。</p>
+        <p>长大后才发现，真正的魔法不是改变别人，而是学会珍惜自己所拥有的一切。」</p>
+      </div>
+      <p class="thanks reveal" id="thanks" aria-label="Thank You For Watching!">Thank You For Watching!</p>
+      <div class="end-actions reveal">
+        <a class="btn" href="#episodes">↻ 重看魔法剧集</a>
+        <a class="btn ghost" href="#home">回到首页 HOME</a>
+      </div>
+      <p class="end-foot">© 《小时候的幻想时刻》 · 学生团队制作</p>
+    </div>
+  </section>
+</main>
+
+<!-- 影片播放弹窗 -->
+<div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card">
+    <button class="modal-close" id="mClose" type="button" aria-label="关闭播放器" data-close>✕</button>
+    <div class="modal-head">
+      <span class="ep-badge" id="mBadge"></span>
+      <h3 id="mTitle"></h3>
+      <p id="mEn"></p>
+    </div>
+    <div class="modal-layout">
+    <div class="player-wrap" id="playerWrap"></div>
+    <div class="modal-side">
+    <div class="modal-info">
+      <p class="loc" id="mLoc"></p>
+      <p id="mDetail"></p>
+    </div>
+    <div class="modal-nav">
+      <button class="btn ghost" id="mPrev" type="button">◀ 上一集</button>
+      <span class="modal-tool" id="mTool"></span>
+      <button class="btn" id="mNext" type="button">下一集 ▶</button>
+    </div>
+    <p class="file-note" id="fileNote" hidden>提示：你正在用「本机文件」打开网站，YouTube 常会拒绝在这种方式下嵌入播放（显示“在 YouTube 观看”或错误 153）。把网站上传到网络空间（如 GitHub Pages / Netlify），或用本地服务器打开，就能直接在这里播放。</p>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- 返回顶部 -->
+<button id="toTop" class="to-top" type="button" aria-label="返回顶部">
+  <svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 27V6M7 14l9-9 9 9"/></svg>
+</button>
+
+
+<!-- =====================================================
+     ★ 可编辑设置区 CONFIG ★
+     1. YouTube：把每一集的 youtube 填成「视频链接」或「11 位视频 ID」即可
+        支持：https://www.youtube.com/watch?v=xxxx  /  https://youtu.be/xxxx  /  xxxx
+     2. 封面：thumb 留空时，填了 YouTube 链接会自动使用 YouTube 缩略图；
+        也可以填自己的图片路径，例如 'images/ep01.jpg'
+     3. 角色照片：photo 填图片路径，例如 'images/xiaolan.jpg'（建议 4:5 竖图）
+     ===================================================== -->
+<script>
+const EPISODES = [
+  { no:1, title:'神奇魔法笔', en:'The Magic Pen', location:'图书馆 · 课室',
+    youtube:'https://youtube.com/shorts/DtvJZYXX3Ok?si=WJ1DreRNyygkgk_d',   /* ← EP01 YouTube 链接 */
+    thumb:'',
+    desc:'小蓝在图书馆发现神秘盒子，里面藏着一支发光的魔法笔和一张字条。',
+    detail:'小蓝在书架前挑书时，意外发现一个神秘的盒子。打开后，一道黄色的光亮起——里面是一支神奇的笔和一张神秘字条。回到课室，她在水杯上写下愿望：「我想要我的水杯变满！」突然，一道光出现……画面在悬念中结束。' },
+  { no:2, title:'愿望实现了！', en:'The Wish Came True!', location:'课室',
+    youtube:'https://youtube.com/shorts/qyxSjYPHUi4?si=kEghjAmi7vcaUhdW',   /* ← EP02 YouTube 链接 */
+    thumb:'',
+    desc:'水杯真的装满了水！小蓝开心地展示魔法，小紫的眼中却出现了羡慕与嫉妒。',
+    detail:'光芒过后，小蓝发现水杯竟然真的满了！她惊讶地喝下一口，确认这一切是真的。小蓝开心地向同学展示魔法笔，大家也纷纷尝试。可是她渐渐变得骄傲，甚至开始炫耀；另一边，小紫看着这一切，眼神里慢慢出现了羡慕和嫉妒。' },
+  { no:3, title:'嫉妒的开始', en:'The Beginning of Envy', location:'课室',
+    youtube:'https://youtube.com/shorts/41xMj25EvUE?si=OAbfLo52B4kQ5uhw',   /* ← EP03 YouTube 链接 */
+    thumb:'',
+    desc:'大家都围着小蓝，小紫默默看着，心里越来越不平衡，决定伺机拿走魔法笔。',
+    detail:'同学们都想用魔法笔实现愿望，小蓝成了大家关注的焦点。她问小紫：「你也想要实现愿望吗？」小紫心里越来越不平衡——为什么所有人都只关注小蓝？她决定找机会拿走魔法笔。下课铃响起，小蓝把魔法笔放进书包，小紫在一旁偷偷观察。' },
+  { no:4, title:'魔法笔不见了？', en:'Where Is the Magic Pen?', location:'课室',
+    youtube:'https://youtube.com/shorts/jonvs365vuA?si=jL-6CjCnRObpA_h_',   /* ← EP04 YouTube 链接 */
+    thumb:'',
+    desc:'魔法笔似乎被动过了！小蓝怀疑小紫，两人在课室里发生争执。',
+    detail:'下课铃响起，小蓝收拾好东西跑出课室，小紫趁机行动。小蓝回到座位时，发现魔法笔似乎被动过：「是不是你拿了？」小紫紧张地回答：「没有！怎么可能是我！」小蓝继续追问：「那就是你！」两人开始发生争执。' },
+  { no:5, title:'贪念与嫉妒', en:'Greed and Jealousy', location:'课室',
+    youtube:'https://youtube.com/shorts/r45OExo9uT0?si=LOjE0CNCBidpMIfs',   /* ← EP05 YouTube 链接 */
+    thumb:'',
+    desc:'小紫写下一个又一个愿望，嫉妒让她渐渐失去理智——这时，神秘小精灵出现了……',
+    detail:'小紫开始使用魔法笔，写下希望所有人都关注自己、而不是小蓝的愿望。她越来越嫉妒，甚至做出伤害小蓝的事，不断写下愿望想要取代小蓝，逐渐失去理智。就在这个时候，一个神秘的小精灵突然出现……' },
+  { no:6, title:'神秘小精灵', en:'The Mysterious Fairy', location:'课室',
+    youtube:'https://youtube.com/shorts/s3hAbAvo77A?si=Y3es1mGs6uIPznlo',   /* ← EP06 YouTube 链接 */
+    thumb:'',
+    desc:'小精灵送给小蓝一块神奇的橡皮擦，小蓝决定去找小紫，弄清真相。',
+    detail:'小精灵出现，送给小蓝一块神奇的橡皮擦，并告诉她这块橡皮擦拥有特殊的力量。小蓝渐渐了解橡皮擦的用途，发现它能帮助自己面对眼前的问题。她决定去找小紫，弄清楚事情的真相。' },
+  { no:7, title:'真相与魔法尺', en:'The Truth and the Magic Ruler', location:'课室 · 办公室',
+    youtube:'https://youtube.com/shorts/W4nT0zuhNIE?si=9CQUP9CXNOrcxC3w',   /* ← EP07 YouTube 链接 */
+    thumb:'',
+    desc:'小蓝揭穿谎言，用橡皮擦擦掉恶意的愿望；老师竟拿出了一把神奇的尺！',
+    detail:'小蓝气势汹汹地质问小紫，小紫心虚地回答：「怎么可能！」小蓝拿出小紫写下的字条揭穿谎言，并用橡皮擦擦掉那些恶意的愿望。小紫崩溃地跑出课室。小蓝来到办公室，老师听完后露出意味深长的笑容，拿出一把神奇的尺——原来，老师也拥有魔法！' },
+  { no:8, title:'最后的魔法', en:'The Final Magic', location:'课室 · 办公室',
+    youtube:'https://youtube.com/shorts/sURLNC7I1Yg?si=NUc50r9VjNomUU07 ',   /* ← EP08 YouTube 链接 */
+    thumb:'',
+    desc:'两人反思错误，却发现老师才是想独占魔法的人——小蓝与小紫决定联手夺回魔法。',
+    detail:'小紫质问小蓝为什么这样对待自己，两人互相指责后，开始反思自己的错误。老师把她们带到课室外：「等你们认识自己的错误在哪里，我才会把魔法还给你们。」随后，老师露出真正的目的——原来老师一直想得到魔法笔和魔法！小蓝和小紫决定合作夺回魔法，终于明白：友情和信任比魔法更重要。' }
+];
+
+const CHARACTERS = [
+  { name:'小蓝', en:'XIAO LAN · LITTLE BLUE', role:'主角', avatar:'blue',
+    photo:'',   /* ← 小蓝 剧照路径，例如 'images/xiaolan.jpg' */
+    desc:'故事的主角，意外得到魔法笔，后来经历了嫉妒、误会和友情的考验。' },
+  { name:'小紫', en:'XIAO ZI · LITTLE PURPLE', role:'主要角色', avatar:'purple',
+    photo:'',   /* ← 小紫 剧照路径 */
+    desc:'因为羡慕小蓝拥有魔法笔，逐渐产生嫉妒和贪念，最后学习承认错误。' },
+  { name:'老师', en:'THE TEACHER', role:'神秘角色', avatar:'teacher',
+    photo:'',   /* ← 老师 剧照路径 */
+    desc:'表面上是普通老师，实际上也拥有自己的魔法，隐藏着意想不到的秘密。' },
+  { name:'小精灵', en:'THE FAIRY', role:'魔法向导', avatar:'fairy',
+    photo:'',   /* ← 小精灵 剧照路径 */
+    desc:'神秘的角色，帮助小蓝认识橡皮擦的力量。' }
+];
+</script>
+
+<!-- =====================================================
+     主程序 APP（一般不需要修改）
+     ===================================================== -->
+<script>
+(() => {
+'use strict';
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const pad = n => String(n).padStart(2,'0');
+const rand = (a,b,f=Math.random) => a + f()*(b-a);
+const html = document.documentElement;
+
+/* ---------- 文具 SVG 图案库（全部为自制矢量） ---------- */
+const PAL = ['#ffd84d','#8ecbff','#c9b6ff','#ff9ec4','#ffe9a8','#9be7c4'];
+const ART = {
+  pencil:  c=>`<svg viewBox="0 0 64 64"><g transform="rotate(45 32 32)"><rect x="24" y="4" width="16" height="42" rx="2" fill="${c}"/><rect x="24" y="4" width="16" height="8" rx="3" fill="#ff9ec4"/><rect x="24" y="12" width="16" height="4" fill="#c9c9d6"/><polygon points="24,46 40,46 32,61" fill="#f7dcae"/><polygon points="29,55 35,55 32,61" fill="#4b3f72"/><rect x="28" y="16" width="3" height="30" fill="rgba(255,255,255,.55)"/></g></svg>`,
+  pen:     c=>`<svg viewBox="0 0 64 64"><g transform="rotate(-35 32 32)"><rect x="25" y="5" width="14" height="40" rx="6" fill="${c}"/><rect x="25" y="26" width="14" height="4" fill="#fff" opacity=".6"/><path d="M26 45h12l-6 16z" fill="#ffd84d"/><circle cx="32" cy="51" r="1.8" fill="#4b3f72"/><rect x="38" y="10" width="3" height="18" rx="1.5" fill="#ffd84d"/></g></svg>`,
+  eraser:  c=>`<svg viewBox="0 0 64 64"><g transform="rotate(-20 32 32)"><rect x="8" y="20" width="48" height="24" rx="7" fill="#ff9ec4"/><path d="M30 20h19a7 7 0 0 1 7 7v10a7 7 0 0 1-7 7H30z" fill="${c}"/></g></svg>`,
+  ruler:   c=>`<svg viewBox="0 0 64 64"><g transform="rotate(25 32 32)"><rect x="3" y="22" width="58" height="20" rx="4" fill="${c}"/><g stroke="#4b3f72" stroke-width="1.5" stroke-linecap="round">${Array.from({length:13},(_,i)=>`<path d="M${8+i*4.2} 22v${i%2?5:9}"/>`).join('')}</g></g></svg>`,
+  scissors:c=>`<svg viewBox="0 0 64 64"><g transform="rotate(-25 32 32)"><path d="M24 44L46 5M40 44L18 5" stroke="#aeb9d6" stroke-width="5" stroke-linecap="round"/><circle cx="21" cy="50" r="8" fill="none" stroke="${c}" stroke-width="5"/><circle cx="43" cy="50" r="8" fill="none" stroke="${c}" stroke-width="5"/><circle cx="32" cy="26" r="2.5" fill="#4b3f72"/></g></svg>`,
+  notebook:c=>`<svg viewBox="0 0 64 64"><rect x="13" y="6" width="42" height="52" rx="5" fill="${c}"/><g fill="#fff" stroke="#9d7be8" stroke-width="1.5">${[14,23,32,41,50].map(y=>`<circle cx="13" cy="${y}" r="3.2"/>`).join('')}</g><g fill="rgba(255,255,255,.75)"><rect x="23" y="16" width="26" height="3" rx="1.5"/><rect x="23" y="24" width="20" height="3" rx="1.5"/><rect x="23" y="32" width="24" height="3" rx="1.5"/></g><path d="M44 44l2 4 4 .6-3 3 .8 4.2-3.8-2-3.8 2 .8-4.2-3-3 4-.6z" fill="#ffd84d"/></svg>`,
+  clip:    c=>`<svg viewBox="0 0 64 64"><g transform="rotate(20 32 32)"><path d="M22 46V20a10 10 0 0 1 20 0v27a6 6 0 0 1-12 0V24" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/></g></svg>`,
+  sticky:  c=>`<svg viewBox="0 0 64 64"><g transform="rotate(-8 32 32)"><rect x="9" y="9" width="46" height="46" rx="4" fill="${c}"/><path d="M55 40L40 55h12a3 3 0 0 0 3-3z" fill="rgba(75,63,114,.14)"/><rect x="17" y="21" width="30" height="3" rx="1.5" fill="rgba(75,63,114,.35)"/><rect x="17" y="29" width="22" height="3" rx="1.5" fill="rgba(75,63,114,.35)"/></g></svg>`,
+  paper:   c=>`<svg viewBox="0 0 64 64"><rect x="10" y="12" width="38" height="44" rx="3" fill="#ff9ec4" transform="rotate(-10 29 34)"/><rect x="16" y="8" width="38" height="44" rx="3" fill="${c}" transform="rotate(8 35 30)"/></svg>`,
+  star:    c=>`<svg viewBox="0 0 64 64"><polygon points="32,5 39.5,24.5 60,25.5 44,38.5 49.5,58.5 32,47 14.5,58.5 20,38.5 4,25.5 24.5,24.5" fill="${c}" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`
+};
+const ART_KEYS = Object.keys(ART);
+const art = (k,c) => ART[k](c || PAL[Math.floor(Math.random()*PAL.length)]);
+
+/* ---------- 鼠标用文具 SVG（48×48，笔尖/角落在左下角） ---------- */
+const CURSOR_SVG = {
+  pencil:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g transform="translate(4 44) rotate(-45)" stroke="#4b3f72" stroke-width="1.6" stroke-linejoin="round"><polygon points="0,0 10,-5 10,5" fill="#f7dcae"/><polygon points="0,0 3.6,-1.8 3.6,1.8" fill="#4b3f72"/><rect x="10" y="-5" width="28" height="10" fill="#ffd84d"/><path d="M10 -1.7H38M10 1.7H38" stroke="#ff9ec4" stroke-width="1.4"/><rect x="38" y="-5" width="4" height="10" fill="#d4d6e6"/><rect x="42" y="-5" width="6" height="10" rx="2.5" fill="#ff8fb8"/></g></svg>`,
+  eraser:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g transform="translate(8 44) rotate(-25)" stroke="#4b3f72" stroke-width="1.6" stroke-linejoin="round"><rect x="0" y="-15" width="36" height="15" rx="3.5" fill="#ff9ec4"/><path d="M20 -15H32.5a3.5 3.5 0 0 1 3.5 3.5V-3.5a3.5 3.5 0 0 1-3.5 3.5H20Z" fill="#8ecbff"/><path d="M6 -10v5" stroke="#fff" stroke-linecap="round" stroke-width="2"/></g></svg>`,
+  ruler:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g transform="translate(8 44) rotate(-40)" stroke="#4b3f72" stroke-width="1.6" stroke-linejoin="round"><rect x="0" y="-11" width="40" height="11" rx="2.5" fill="#c9b6ff"/><path d="M5 -11v4M10 -11v6M15 -11v4M20 -11v6M25 -11v4M30 -11v6M35 -11v4" stroke-width="1.3" stroke-linecap="round"/></g></svg>`
+};
+const HOT = { pencil:[4,44], eraser:[8,44], ruler:[8,44] };
+const TOOLS = {
+  pencil:{ name:'铅笔',   stage:'第一阶段', eps:'EP01 – EP03', colors:['#ffd84d','#8ecbff','#ff9ec4','#c9b6ff'] },
+  eraser:{ name:'橡皮擦', stage:'第二阶段', eps:'EP04 – EP05', colors:['#ff9ec4','#ffd9e8','#ffffff','#ffc2dc'] },
+  ruler: { name:'尺',     stage:'第三阶段', eps:'EP06 – EP08', colors:['#8ecbff','#c9b6ff','#9be7c4','#ffe38a'] }
+};
+const toolForEp = n => n <= 3 ? 'pencil' : n <= 5 ? 'eraser' : 'ruler';
+
+/* ---------- 特效：点击星星迸发 / toast ---------- */
+function burst(px, py, colors, n=10){
+  for(let i=0;i<n;i++){
+    const s = document.createElement('i');
+    const a = Math.random()*Math.PI*2, d = 26 + Math.random()*38;
+    s.className = 'burst';
+    s.textContent = i%2 ? '✦' : '★';
+    s.style.cssText = `left:${px}px;top:${py}px;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;color:${colors[i%colors.length]};font-size:${10+Math.random()*11}px`;
+    document.body.appendChild(s);
+    s.addEventListener('animationend', () => s.remove());
+  }
+}
+let toastTimer;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2300);
+}
+
+/* =====================================================
+   自定义鼠标：铅笔 / 橡皮擦 / 尺
+   ===================================================== */
+const Cursor = (() => {
+  const el = $('#cursor'), inner = $('.cursor-inner', el);
+  const mq = matchMedia('(hover: hover) and (pointer: fine)');
+  let on = false, x = -200, y = -200, tool = 'pencil', dirty = false, lastT = 0, lx = -999, ly = -999, trails = 0;
+
+  function paint(){ inner.innerHTML = CURSOR_SVG[tool]; inner.style.setProperty('--hx', HOT[tool][0] + 'px'); inner.style.setProperty('--hy', HOT[tool][1] + 'px'); }
+  function setTool(t, animate = true){
+    if (t === tool && inner.firstChild) return;
+    tool = t; paint();
+    if (animate){ el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
+  }
+  function enable(){ if(on) return; on = true; html.classList.add('cc'); el.classList.add('on'); }
+  function disable(){ if(!on) return; on = false; html.classList.remove('cc'); el.classList.remove('on'); }
+  function apply(){ dirty = false; el.style.transform = `translate3d(${x}px,${y}px,0)`; }
+  function trail(){
+    if (trails > 36) return;
+    const s = document.createElement('i'); trails++;
+    const cols = TOOLS[tool].colors, c = cols[Math.floor(Math.random()*cols.length)];
+    s.className = 'trail';
+    s.textContent = tool === 'eraser' ? '●' : tool === 'ruler' ? '▪' : '✦';
+    s.style.cssText = `left:${x + rand(-4,4)}px;top:${y + rand(-4,4)}px;--dx:${rand(-16,16)}px;color:${c};font-size:${rand(8,15)}px;text-shadow:0 0 4px ${c}`;
+    document.body.appendChild(s);
+    s.addEventListener('animationend', () => { s.remove(); trails--; });
+  }
+
+  document.addEventListener('pointermove', e => {
+    if (e.pointerType && e.pointerType !== 'mouse'){ disable(); return; }
+    if (!on && mq.matches) enable();
+    if (!on) return;
+    x = e.clientX; y = e.clientY;
+    if (!dirty){ dirty = true; requestAnimationFrame(apply); }
+    const now = performance.now();
+    if (now - lastT > 42 && Math.hypot(x - lx, y - ly) > 8 && !el.classList.contains('hidden')){ lastT = now; lx = x; ly = y; trail(); }
+  }, { passive:true });
+  document.addEventListener('pointerdown', e => {
+    if (on) el.classList.add('press');
+    burst(e.clientX, e.clientY, TOOLS[tool].colors, 9);
+  }, { passive:true });
+  ['pointerup','pointercancel'].forEach(ev => document.addEventListener(ev, () => el.classList.remove('press'), { passive:true }));
+  html.addEventListener('mouseleave', () => el.classList.add('out'));
+  html.addEventListener('mouseenter', () => el.classList.remove('out'));
+  document.addEventListener('touchstart', disable, { passive:true });
+  const onMQ = () => mq.matches ? enable() : disable();
+  mq.addEventListener ? mq.addEventListener('change', onMQ) : mq.addListener(onMQ);
+
+  paint();
+  if (mq.matches) enable();
+  return { setTool, hide: v => el.classList.toggle('hidden', !!v), get tool(){ return tool; } };
+})();
+
+/* ---------- 背景：文具世界 ---------- */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; } }
+let bgWidth = 0;
+function buildBackground(){
+  const bg = $('#bg'); const w = innerWidth, h = Math.max(document.documentElement.scrollHeight, innerHeight);
+  bgWidth = w; bg.innerHTML = '';
+  const rnd = mulberry32(20260607);
+  const n = Math.max(26, Math.min(120, Math.round(w*h/(w>1000?135000:105000))));
+  const cols = w>1000 ? 8 : w>640 ? 6 : 4, rows = Math.ceil(n/cols);
+  const frag = document.createDocumentFragment();
+  for (let i=0;i<n;i++){
+    const col = i % cols, row = Math.floor(i/cols);
+    const left = ((col + (row%2 ? .5 : 0) + rnd()*.7) / cols) * 100;
+    const top  = ((row + rnd()*.8) / rows) * 100;
+    const size = rand(w>640?46:34, w>640?96:62, rnd);
+    const d = document.createElement('div');
+    d.className = 'bg-item';
+    d.style.cssText = `left:${Math.min(left,96).toFixed(1)}%;top:${Math.min(top,98).toFixed(1)}%;--s:${size.toFixed(0)}px;--r:${rand(-40,40,rnd).toFixed(0)}deg;--t:${rand(5,9,rnd).toFixed(1)}s;--d:${(-rand(0,8,rnd)).toFixed(1)}s`;
+    d.innerHTML = ART[ART_KEYS[Math.floor(rnd()*ART_KEYS.length)]](PAL[Math.floor(rnd()*PAL.length)]);
+    frag.appendChild(d);
+  }
+  const sparkChars = ['✦','✧','★','✺'], sparkCols = ['#ffd84d','#ffffff','#ff9ec4','#8ecbff'];
+  for (let i=0;i<Math.round(n*1.1);i++){
+    const s = document.createElement('i');
+    s.className = 'spark'; s.textContent = sparkChars[Math.floor(rnd()*sparkChars.length)];
+    s.style.cssText = `left:${(rnd()*98).toFixed(1)}%;top:${(rnd()*98).toFixed(1)}%;--s:${rand(9,22,rnd).toFixed(0)}px;--c:${sparkCols[Math.floor(rnd()*sparkCols.length)]};--t:${rand(2,5,rnd).toFixed(1)}s;--d:${(-rand(0,5,rnd)).toFixed(1)}s`;
+    frag.appendChild(s);
+  }
+  bg.appendChild(frag);
+}
+
+/* ---------- 加载动画 ---------- */
+$('#loaderPencil').innerHTML = CURSOR_SVG.pencil;
+let loaderGone = false;
+function hideLoader(){
+  if (loaderGone) return; loaderGone = true;
+  const l = $('#loader'); l.classList.add('done'); setTimeout(() => l.remove(), 800);
+}
+const t0 = performance.now();
+window.addEventListener('load', () => setTimeout(hideLoader, Math.max(0, 1300 - (performance.now() - t0))));
+setTimeout(hideLoader, 4500);
+
+/* ---------- 欢迎页：文具飞入 + 进入动画 ---------- */
+function buildIntro(){
+  const wrap = $('#introItems'); const w = innerWidth, h = innerHeight;
+  const small = w < 640, n = small ? 12 : 20;
+  const rnd = mulberry32(777);
+  for (let i=0;i<n;i++){
+    const ang = (i/n)*Math.PI*2 + rnd()*.3;
+    const rx = 44 + rnd()*6, ry = 40 + rnd()*8;       // 沿椭圆环散落在四周
+    const px = 50 + Math.cos(ang)*rx, py = 50 + Math.sin(ang)*ry;
+    const size = rand(small?44:60, small?74:110, rnd);
+    const d = document.createElement('div');
+    d.className = 'intro-item';
+    const dirx = Math.cos(ang), diry = Math.sin(ang);
+    d.style.cssText = `left:${px.toFixed(1)}%;top:${py.toFixed(1)}%;margin:-${size/2}px 0 0 -${size/2}px;--s:${size.toFixed(0)}px;--r:${rand(-45,45,rnd).toFixed(0)}deg;--d:${(i*0.06).toFixed(2)}s;--sx:${(dirx*w*.8).toFixed(0)}px;--sy:${(diry*h*.8).toFixed(0)}px;--dx:${(dirx*w*1.1).toFixed(0)}px;--dy:${(diry*h*1.1).toFixed(0)}px`;
+    d.innerHTML = ART[ART_KEYS[i % ART_KEYS.length]](PAL[i % PAL.length]);
+    wrap.appendChild(d);
+  }
+}
+function enterSite(){
+  const intro = $('#intro'); if (intro.classList.contains('leaving')) return;
+  intro.classList.add('leaving');
+  $('#enterBtn').blur();
+  setTimeout(() => {
+    intro.classList.add('gone');
+    document.body.classList.remove('locked');
+    document.body.classList.add('entered');
+    window.scrollTo(0, 0);
+    buildBackground();
+  }, 1500);
+}
+$('#enterBtn').addEventListener('click', enterSite);
+
+/* ---------- 导航 ---------- */
+const nav = $('#nav'), burger = $('#burger');
+burger.addEventListener('click', () => {
+  const open = nav.classList.toggle('open'); burger.setAttribute('aria-expanded', open);
+});
+$$('#navLinks a').forEach(a => a.addEventListener('click', () => { nav.classList.remove('open'); burger.setAttribute('aria-expanded', 'false'); }));
+document.addEventListener('click', e => { if (!nav.contains(e.target)) nav.classList.remove('open'); });
+
+const secs = ['home','about','episodes','characters','end'].map(id => $('#' + id));
+const toTop = $('#toTop');
+let ticking = false;
+function onScroll(){
+  ticking = false;
+  const y = window.scrollY;
+  let cur = secs[0].id;
+  secs.forEach(s => { if (s.offsetTop - 140 <= y) cur = s.id; });
+  if (y + innerHeight >= document.documentElement.scrollHeight - 4) cur = 'end';
+  $$('#navLinks a').forEach(a => a.classList.toggle('active', a.dataset.sec === cur));
+  toTop.classList.toggle('show', y > 600);
+}
+window.addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(onScroll); } }, { passive:true });
+toTop.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+/* ---------- HOME 装饰 / ABOUT 三件魔法文具 ---------- */
+(function heroDecor(){
+  const box = $('#heroFloats');
+  const spots = [['pencil',-8,2,'#ffd84d',-30],['eraser',92,10,'#8ecbff',20],['ruler',-6,70,'#c9b6ff',-18],['scissors',94,66,'#ff9ec4',24],['notebook',4,92,'#ffe9a8',-10],['pen',90,92,'#8ecbff',16]];
+  spots.forEach(([k,l,t,c,r],i) => {
+    const d = document.createElement('div'); d.className = 'hero-float';
+    d.style.cssText = `left:${l}%;top:${t}%;--s:${72 + (i%3)*16}px;--r:${r}deg;--d:${-i*.8}s`;
+    d.innerHTML = ART[k](c); box.appendChild(d);
+  });
+  $('#toolTrio').innerHTML = [
+    ['pencil','魔法笔','可以实现愿望'],
+    ['eraser','魔法橡皮擦','可以擦掉不开心的事情'],
+    ['ruler','魔法尺','也许拥有我们意想不到的力量']
+  ].map(([k,t,d]) => `<div class="panel tool-card"><div>${CURSOR_SVG[k]}</div><div><h4>${t}</h4><p>${d}</p></div></div>`).join('');
+})();
+
+/* =====================================================
+   EPISODES
+   ===================================================== */
+const state = { ep:1 };
+
+function parseYouTube(v){
+  if (!v) return '';
+  v = String(v).trim();
+  if (/^[\w-]{11}$/.test(v)) return v;
+  try {
+    const u = new URL(v);
+    if (u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('/')[0];
+    if (u.searchParams.get('v')) return u.searchParams.get('v');
+    const m = u.pathname.match(/\/(embed|shorts|live|v)\/([\w-]{11})/);
+    if (m) return m[2];
+  } catch(e){}
+  return '';
+}
+
+const PLAY_SVG = `<svg viewBox="0 0 24 24"><polygon points="5,3 21,12 5,21" fill="#ff6fa5" stroke="#ff6fa5" stroke-width="2" stroke-linejoin="round"/></svg>`;
+
+function renderStages(){
+  $('#stageBanner').innerHTML = Object.entries(TOOLS).map(([k,t]) =>
+    `<button class="stage" type="button" data-tool="${k}"><span style="width:54px;flex:none">${CURSOR_SVG[k]}</span><span><b>${t.stage} · ${t.name}鼠标</b><span>${t.eps}</span></span></button>`
+  ).join('');
+}
+function renderEpisodes(){
+  $('#epTabs').innerHTML = EPISODES.map(e => `<button class="ep-tab" type="button" data-ep="${e.no}" aria-pressed="false">EP ${pad(e.no)}</button>`).join('');
+  $('#epGrid').innerHTML = EPISODES.map(e => {
+    const t = toolForEp(e.no), id = parseYouTube(e.youtube);
+    const thumb = e.thumb || (id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '');
+    return `
+    <article class="ep-card reveal" data-ep="${e.no}" data-tool="${t}">
+      <button class="ep-cover" type="button" data-play="${e.no}" aria-label="播放第 ${e.no} 集：${e.title}">
+        ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ''}
+        <span class="film l"></span><span class="film r"></span>
+        ${thumb ? '' : `<span class="ep-bignum">${pad(e.no)}</span><span class="ep-toolicon">${CURSOR_SVG[t]}</span>`}
+        <span class="play-disc">${PLAY_SVG}</span>
+      </button>
+      <div class="ep-body">
+        <span class="ep-badge">EPISODE ${pad(e.no)}</span>
+        <h3>${e.title}</h3>
+        <p class="ep-en">${e.en}</p>
+        <p class="ep-loc">📍 ${e.location}</p>
+        <p class="ep-desc">${e.desc}</p>
+        <button class="btn ep-play" type="button" data-play="${e.no}">▶ PLAY 播放</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function selectEpisode(n, opt = {}){
+  const prevTool = toolForEp(state.ep), t = toolForEp(n);
+  state.ep = n;
+  Cursor.setTool(t, !opt.init);
+  $$('.ep-tab').forEach(b => { const on = +b.dataset.ep === n; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+  $$('.ep-card').forEach(c => c.classList.toggle('active', +c.dataset.ep === n));
+  $$('.stage').forEach(s => s.classList.toggle('active', s.dataset.tool === t));
+  if (opt.toast === 'always' || (opt.toast !== false && t !== prevTool))
+    toast(`EP ${pad(n)} · 鼠标变成了「${TOOLS[t].name}」 ✦`);
+}
+
+$('#epTabs').addEventListener('click', e => {
+  const b = e.target.closest('.ep-tab'); if (!b) return;
+  const n = +b.dataset.ep; selectEpisode(n, { toast:'always' });
+  const card = $(`.ep-card[data-ep="${n}"]`); if (card) card.scrollIntoView({ behavior:'smooth', block:'center' });
+});
+$('#stageBanner').addEventListener('click', e => {
+  const b = e.target.closest('.stage'); if (!b) return;
+  const first = EPISODES.find(x => toolForEp(x.no) === b.dataset.tool).no;
+  selectEpisode(first, { toast:'always' });
+});
+$('#epGrid').addEventListener('click', e => {
+  const card = e.target.closest('.ep-card'); if (!card) return;
+  const n = +card.dataset.ep, p = e.target.closest('[data-play]');
+  if (p) openEpisode(n, p); else selectEpisode(n, { toast:'always' });
+});
+
+/* ---------- 影片弹窗 ---------- */
+const modal = $('#modal'), pw = $('#playerWrap');
+let lastFocus = null, current = 1;
+
+function buildPlayer(e){
+  pw.innerHTML = '';
+  const id = parseYouTube(e.youtube), t = toolForEp(e.no);
+  if (id){
+    const f = document.createElement('iframe');
+    const q = new URLSearchParams({ autoplay:1, rel:0, playsinline:1, modestbranding:1, iv_load_policy:3 });
+    if (/^https?:$/.test(location.protocol)){ q.set('enablejsapi', '1'); q.set('origin', location.origin); }
+    f.src = `https://www.youtube.com/embed/${id}?${q}`;
+    f.title = `第 ${e.no} 集：${e.title}`;
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.allowFullscreen = true;
+    pw.appendChild(f);
+  } else {
+    pw.innerHTML = `<div class="player-empty"><div class="pe-icon">${CURSOR_SVG[t]}</div><strong>EP ${pad(e.no)} 即将上线</strong><p>COMING SOON ✦<br>（制作者提示：请在 index.html 顶部 <code>EPISODES</code> 中，把第 ${e.no} 集的 <code>youtube</code> 填入 YouTube 链接）</p></div>`;
+  }
+}
+function showEpisode(n){
+  current = n;
+  const e = EPISODES[n-1], t = toolForEp(n);
+  selectEpisode(n);
+  $('#mBadge').textContent = `EPISODE ${pad(n)}`;
+  $('#mTitle').textContent = e.title;
+  $('#mEn').textContent = e.en;
+  $('#mLoc').textContent = `📍 地点：${e.location}`;
+  $('#mDetail').textContent = e.detail;
+  $('#mTool').innerHTML = `${CURSOR_SVG[t]}<span>${TOOLS[t].stage} · ${TOOLS[t].name}鼠标</span>`;
+  $('#mPrev').disabled = n <= 1;
+  $('#mNext').disabled = n >= EPISODES.length;
+  buildPlayer(e);
+  $('#fileNote').hidden = !(location.protocol === 'file:' && parseYouTube(e.youtube));
+}
+function openEpisode(n, trigger){
+  lastFocus = trigger || document.activeElement;
+  showEpisode(n);
+  modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open'); html.classList.add('video-open');
+  $('#mClose').focus({ preventScroll:true });
+}
+function closeModal(){
+  if (!modal.classList.contains('open')) return;
+  modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open'); html.classList.remove('video-open');
+  pw.innerHTML = '';              // 移除 iframe，停止播放
+  Cursor.hide(false);
+  if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll:true });
+}
+$$('[data-close]', modal).forEach(b => b.addEventListener('click', closeModal));
+$('#mPrev').addEventListener('click', () => current > 1 && showEpisode(current - 1));
+$('#mNext').addEventListener('click', () => current < EPISODES.length && showEpisode(current + 1));
+document.addEventListener('keydown', e => {
+  if (!modal.classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft' && current > 1) showEpisode(current - 1);
+  if (e.key === 'ArrowRight' && current < EPISODES.length) showEpisode(current + 1);
+});
+/* 鼠标进入影片区域：隐藏自制鼠标、使用系统鼠标，保证播放器可正常操作 */
+pw.addEventListener('mouseenter', () => Cursor.hide(true));
+pw.addEventListener('mouseleave', () => Cursor.hide(false));
+
+/* =====================================================
+   CHARACTERS
+   ===================================================== */
+const FACE = `<ellipse cx="100" cy="112" rx="42" ry="46" fill="#ffe2c8"/><circle cx="84" cy="116" r="5.5" fill="#4b3f72"/><circle cx="116" cy="116" r="5.5" fill="#4b3f72"/><circle cx="86" cy="114" r="1.8" fill="#fff"/><circle cx="118" cy="114" r="1.8" fill="#fff"/><ellipse cx="71" cy="131" rx="8" ry="5" fill="#ffb3c9" opacity=".75"/><ellipse cx="129" cy="131" rx="8" ry="5" fill="#ffb3c9" opacity=".75"/><path d="M91 134q9 10 18 0" stroke="#4b3f72" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+const AVATARS = {
+  blue:`<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice"><circle cx="100" cy="120" r="88" fill="#d6ecff"/><path d="M38 250q0-80 62-80t62 80z" fill="#8ecbff"/><path d="M52 118Q46 52 100 52t48 66q3 34-10 48H62q-13-14-10-48z" fill="#5fb4f2"/>${FACE}<path d="M56 104Q58 60 100 60t44 44q-24-22-44-20-22-2-44 20z" fill="#5fb4f2"/><path d="M142 66l22-10-4 22zM142 66l-6 20-14-14z" fill="#ffd84d" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><g transform="translate(150 206) rotate(35)"><rect x="-4" y="-34" width="8" height="34" fill="#ffd84d" stroke="#4b3f72" stroke-width="2"/><polygon points="-4,0 4,0 0,10" fill="#f7dcae" stroke="#4b3f72" stroke-width="2"/></g></svg>`,
+  purple:`<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice"><circle cx="100" cy="120" r="88" fill="#ebdcff"/><path d="M38 250q0-80 62-80t62 80z" fill="#c9b6ff"/><circle cx="44" cy="140" r="22" fill="#9d7be8"/><circle cx="156" cy="140" r="22" fill="#9d7be8"/><path d="M52 118Q46 52 100 52t48 66z" fill="#9d7be8"/>${FACE}<path d="M56 104Q58 60 100 60t44 44q-24-22-44-20-22-2-44 20z" fill="#9d7be8"/><circle cx="58" cy="116" r="7" fill="#ff9ec4"/><circle cx="142" cy="116" r="7" fill="#ff9ec4"/><path d="M158 40l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#ffd84d"/></svg>`,
+  teacher:`<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice"><circle cx="100" cy="120" r="88" fill="#ffe9c9"/><path d="M34 250q0-82 66-82t66 82z" fill="#f5a9a9"/><path d="M84 170l16 24 16-24z" fill="#fff"/><circle cx="100" cy="50" r="19" fill="#8a6a55"/><path d="M54 112Q50 58 100 58t46 54q-4-24-46-28-42 4-46 28z" fill="#8a6a55"/>${FACE}<path d="M58 104Q62 66 100 66t42 38q-20-18-42-16-24-2-42 16z" fill="#8a6a55"/><g fill="none" stroke="#4b3f72" stroke-width="3.2"><circle cx="84" cy="116" r="13"/><circle cx="116" cy="116" r="13"/><path d="M97 114h6"/></g><g transform="translate(160 214) rotate(-30)"><rect x="-6" y="-48" width="12" height="48" rx="2" fill="#c9b6ff" stroke="#4b3f72" stroke-width="2"/><path d="M-6-38h5M-6-28h7M-6-18h5M-6-8h7" stroke="#4b3f72" stroke-width="1.6"/></g></svg>`,
+  fairy:`<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice"><circle cx="100" cy="120" r="88" fill="#fff4b8"/><circle cx="100" cy="125" r="64" fill="#fff" opacity=".6"/><ellipse cx="44" cy="112" rx="26" ry="46" transform="rotate(-22 44 112)" fill="#d7efff" stroke="#fff" stroke-width="3" opacity=".95"/><ellipse cx="156" cy="112" rx="26" ry="46" transform="rotate(22 156 112)" fill="#ffd9ec" stroke="#fff" stroke-width="3" opacity=".95"/><ellipse cx="100" cy="188" rx="30" ry="40" fill="#c9b6ff"/><circle cx="100" cy="112" r="44" fill="#ffe9c9"/><circle cx="85" cy="114" r="5.5" fill="#4b3f72"/><circle cx="115" cy="114" r="5.5" fill="#4b3f72"/><circle cx="87" cy="112" r="1.8" fill="#fff"/><circle cx="117" cy="112" r="1.8" fill="#fff"/><ellipse cx="72" cy="128" rx="8" ry="5" fill="#ffb3c9" opacity=".8"/><ellipse cx="128" cy="128" rx="8" ry="5" fill="#ffb3c9" opacity=".8"/><path d="M92 130q8 9 16 0" stroke="#4b3f72" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M82 76Q74 54 62 52M118 76Q126 54 138 52" stroke="#9d7be8" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="62" cy="52" r="6" fill="#ffd84d"/><circle cx="138" cy="52" r="6" fill="#ffd84d"/><path d="M168 168l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1zM28 176l2 5 6 .8-4 4 1.4 6-5.4-3-5.4 3 1.4-6-4-4 6-.8z" fill="#ffd84d"/></svg>`
+};
+const PHOTO_BG = { blue:['#cfe9ff','#e6f2ff'], purple:['#e6d8ff','#f3eaff'], teacher:['#ffe9c9','#fff3df'], fairy:['#fff4b8','#ffe0f0'] };
+function renderCharacters(){
+  $('#charGrid').innerHTML = CHARACTERS.map(c => {
+    const bg = PHOTO_BG[c.avatar] || ['#cfe9ff','#e6d8ff'];
+    return `
+    <article class="panel char-card reveal">
+      <div class="photo-slot" style="--pb1:${bg[0]};--pb2:${bg[1]}" data-avatar="${c.avatar}">
+        ${c.photo ? `<img src="${c.photo}" alt="${c.name} 剧照" loading="lazy">` : `${AVATARS[c.avatar]}<span class="photo-hint">PHOTO HERE</span>`}
+      </div>
+      <h3>${c.name}</h3>
+      <p class="char-en">${c.en}</p>
+      <span class="role">${c.role}</span>
+      <p>${c.desc}</p>
+    </article>`;
+  }).join('');
+  /* 照片加载失败时，自动退回可爱插画 */
+  $$('.photo-slot img').forEach(img => img.addEventListener('error', () => {
+    const slot = img.closest('.photo-slot'); slot.innerHTML = `${AVATARS[slot.dataset.avatar] || ''}<span class="photo-hint">PHOTO HERE</span>`;
+  }));
+}
+
+/* =====================================================
+   THE END：星星、散落文具、Thank You 字母
+   ===================================================== */
+function buildEnd(){
+  const rnd = mulberry32(4242);
+  const stars = $('#endStars');
+  for (let i=0;i<60;i++){
+    const s = document.createElement('i'); s.className = 'spark'; s.textContent = i%3 ? '✦' : '✧';
+    s.style.cssText = `left:${(rnd()*100).toFixed(1)}%;top:${(rnd()*100).toFixed(1)}%;--s:${rand(8,22,rnd).toFixed(0)}px;--c:#fff7c2;--t:${rand(2,5,rnd).toFixed(1)}s;--d:${(-rand(0,5,rnd)).toFixed(1)}s`;
+    stars.appendChild(s);
+  }
+  const fall = $('#endFall'), n = innerWidth < 640 ? 12 : 22;
+  for (let i=0;i<n;i++){
+    const d = document.createElement('div'); d.className = 'fall-item';
+    d.style.cssText = `left:${(rnd()*96).toFixed(1)}%;--s:${rand(34,70,rnd).toFixed(0)}px;--t:${rand(9,17,rnd).toFixed(1)}s;--d:${(-rand(0,16,rnd)).toFixed(1)}s;--rot:${rand(-540,540,rnd).toFixed(0)}deg`;
+    d.innerHTML = ART[ART_KEYS[i % ART_KEYS.length]](PAL[i % PAL.length]);
+    fall.appendChild(d);
+  }
+  const th = $('#thanks'), text = th.textContent;
+  th.textContent = '';
+  [...text].forEach((ch, i) => {
+    const s = document.createElement('span'); s.setAttribute('aria-hidden', 'true');
+    s.textContent = ch === ' ' ? '\u00A0' : ch; s.style.setProperty('--d', (i * 0.07) + 's'); th.appendChild(s);
+  });
+  new IntersectionObserver(es => es.forEach(en => $('#end').classList.toggle('visible', en.isIntersecting)), { threshold:.05 }).observe($('#end'));
+}
+
+/* ---------- 滚动出现动画 ---------- */
+function initReveal(){
+  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } }), { threshold:.12, rootMargin:'0px 0px -40px 0px' });
+  $$('.reveal').forEach(el => io.observe(el));
+}
+
+/* ---------- 初始化 ---------- */
+renderStages();
+renderEpisodes();
+renderCharacters();
+buildEnd();
+buildIntro();
+buildBackground();
+initReveal();
+selectEpisode(1, { init:true, toast:false });   // 默认：铅笔鼠标
+onScroll();
+
+let rT;
+window.addEventListener('resize', () => {
+  clearTimeout(rT);
+  rT = setTimeout(() => { if (innerWidth !== bgWidth) buildBackground(); }, 300);
+});
+window.addEventListener('load', () => { buildBackground(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(buildBackground);
+})();
+</script>
+</body>
+</html>
